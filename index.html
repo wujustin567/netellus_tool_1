@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netellus - 企業減碳決策支援系統</title>
-    <!-- 先定義 Import Map 確保模組解析正確 -->
+    <!-- 1. 嚴格鎖定 React 18.3.1，移除所有 React 19 引用 -->
     <script type="importmap">
 {
   "imports": {
@@ -89,6 +89,7 @@
         <div class="blob" style="bottom: 0%; right: 0%; animation-delay: -10s;"></div>
     </div>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <!-- 2. 改回標準路徑引用 -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
