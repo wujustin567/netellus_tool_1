@@ -34,12 +34,11 @@ const App: React.FC = () => {
       setDb(data);
       setIsDbLoading(false);
     }).catch(err => {
-      console.error("Database Connection Error:", err);
+      console.error("Database Error:", err);
       setIsDbLoading(false);
     });
   }, []);
 
-  // 點擊外部關閉下拉選單
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
@@ -89,10 +88,10 @@ const App: React.FC = () => {
 
   if (isDbLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center p-12 glass-card rounded-[40px] shadow-xl border border-white">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-12 glass-card rounded-[40px] shadow-2xl">
           <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-slate-900 font-bold tracking-widest uppercase">系統核心載入中...</p>
+          <p className="text-slate-900 font-black tracking-widest uppercase animate-pulse">大數據資料庫同步中...</p>
         </div>
       </div>
     );
@@ -100,7 +99,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen relative font-sans text-slate-900">
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-xl border-b border-slate-200' : 'py-8 bg-transparent'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled ? 'py-4 bg-white/90 backdrop-blur-2xl border-b border-slate-200 shadow-sm' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-8 flex justify-between items-center">
           <div className="cursor-pointer group flex items-center space-x-3" onClick={() => window.location.reload()}>
             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-600/20 transform group-hover:rotate-12 transition-all">N</div>
@@ -111,10 +110,10 @@ const App: React.FC = () => {
 
       <main className="container mx-auto px-8 pt-48 pb-32">
         {!isProfileComplete ? (
-          <div className="max-w-md mx-auto glass-card p-10 rounded-[48px] shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500">
+          <div className="max-w-md mx-auto glass-card p-10 rounded-[56px] shadow-3xl relative z-10 animate-in fade-in zoom-in duration-500">
              <div className="text-center mb-10">
-               <h2 className="text-3xl font-black mb-3">產業減碳診斷</h2>
-               <p className="text-emerald-700/60 text-xs font-black uppercase tracking-[0.2em]">Sustainability Decision Support</p>
+               <h2 className="text-3xl font-black mb-3">產業路徑分析</h2>
+               <p className="text-emerald-700/60 text-[10px] font-black uppercase tracking-[0.3em]">Corporate Carbon Strategy</p>
              </div>
 
              <form onSubmit={handleProfileSubmit} className="space-y-8">
@@ -130,8 +129,8 @@ const App: React.FC = () => {
                         setShowSuggestions(true); 
                       }} 
                       onFocus={() => setShowSuggestions(true)}
-                      className={`w-full glass-card border-2 rounded-2xl px-6 py-4.5 font-bold outline-none transition-all text-lg ${isValidIndustry ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-100 focus:border-emerald-400'}`} 
-                      placeholder="例：電子零組件..." 
+                      className={`w-full glass-card border-2 rounded-2xl px-6 py-4.5 font-bold outline-none transition-all text-lg ${isValidIndustry ? 'border-emerald-500 bg-emerald-50/20' : 'border-slate-100 focus:border-emerald-400'}`} 
+                      placeholder="搜尋或選擇..." 
                     />
                     {isValidIndustry && (
                       <div className="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-500 scale-125 animate-in zoom-in duration-300">
@@ -141,7 +140,7 @@ const App: React.FC = () => {
                   </div>
                   
                   {showSuggestions && filteredSuggestions.length > 0 && (
-                    <div className="absolute z-[60] left-0 right-0 mt-3 glass-card rounded-3xl overflow-y-auto max-h-64 shadow-2xl border border-slate-200 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="absolute z-[120] left-0 right-0 mt-3 glass-card rounded-3xl overflow-y-auto max-h-64 shadow-2xl border border-slate-200 animate-in fade-in slide-in-from-top-4 duration-300">
                       {filteredSuggestions.map((ind, i) => (
                         <div 
                           key={i} 
@@ -169,7 +168,7 @@ const App: React.FC = () => {
                     value={taxId} 
                     onChange={(e) => setTaxId(e.target.value.replace(/\D/g, ''))} 
                     className="w-full glass-card border-2 border-slate-100 rounded-2xl px-6 py-4.5 font-bold outline-none focus:border-emerald-400 transition-all text-lg shadow-inner" 
-                    placeholder="請輸入 8 位統編" 
+                    placeholder="8 位統編數字" 
                   />
                 </div>
 
@@ -177,24 +176,24 @@ const App: React.FC = () => {
                   <button 
                     type="submit" 
                     disabled={!isValidIndustry || taxId.length !== 8} 
-                    className={`w-full py-6 rounded-3xl font-black shadow-2xl transition-all text-xl relative overflow-hidden group ${isValidIndustry && taxId.length === 8 ? 'bg-slate-900 text-white hover:bg-black hover:-translate-y-1' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                    className={`w-full py-6 rounded-[30px] font-black shadow-2xl transition-all text-xl relative overflow-hidden group ${isValidIndustry && taxId.length === 8 ? 'bg-slate-900 text-white hover:bg-black hover:-translate-y-1' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                   >
-                    <span className="relative z-10">{isValidIndustry && taxId.length === 8 ? '展開路徑分析' : '完成上方資訊'}</span>
+                    <span className="relative z-10">{isValidIndustry && taxId.length === 8 ? '展開數據藍圖' : '請輸入完整資訊'}</span>
                   </button>
                   {!isValidIndustry && industrySearch.length > 0 && (
-                    <p className="text-center text-[10px] font-black text-rose-500 mt-5 uppercase tracking-widest animate-pulse">請從下拉選單選擇產業名稱以利數據精準對標</p>
+                    <p className="text-center text-[10px] font-black text-rose-500 mt-5 uppercase tracking-widest animate-pulse">請務必點擊選單中的產業名稱以鎖定基準</p>
                   )}
                 </div>
              </form>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto glass-card p-12 rounded-[56px] text-center shadow-2xl animate-in fade-in slide-in-from-bottom-12 duration-700 border border-white">
-            <h2 className="text-3xl font-black mb-12">設定您的企業年度目標</h2>
-            <div className="flex p-2 bg-slate-100 rounded-3xl mb-12 border border-slate-200">
-              <button onClick={() => setGoalPath('carbon')} className={`flex-1 py-4 rounded-2xl font-black transition-all ${goalPath === 'carbon' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}>碳排放減量 (tCO2e)</button>
-              <button onClick={() => setGoalPath('energy')} className={`flex-1 py-4 rounded-2xl font-black transition-all ${goalPath === 'energy' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}>電力節省 (kWh)</button>
+          <div className="max-w-2xl mx-auto glass-card p-12 rounded-[56px] text-center shadow-3xl animate-in fade-in slide-in-from-bottom-12 duration-700 border border-white">
+            <h2 className="text-3xl font-black mb-12">企業年度減量目標設定</h2>
+            <div className="flex p-2 bg-slate-100/50 rounded-3xl mb-12 border border-slate-200">
+              <button onClick={() => setGoalPath('carbon')} className={`flex-1 py-4 rounded-2xl font-black transition-all ${goalPath === 'carbon' ? 'bg-white text-emerald-600 shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}>碳排放減量</button>
+              <button onClick={() => setGoalPath('energy')} className={`flex-1 py-4 rounded-2xl font-black transition-all ${goalPath === 'energy' ? 'bg-white text-emerald-600 shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}>節電目標</button>
             </div>
-            <div className="grid grid-cols-2 gap-8 mb-12">
+            <div className="grid grid-cols-2 gap-10 mb-12">
               <div className="text-left space-y-3">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">年度基準值</label>
                 <input type="number" autoComplete="off" value={currentVal} onChange={(e) => setCurrentVal(e.target.value)} className="w-full glass-card border-2 border-slate-100 rounded-2xl p-6 text-3xl font-black text-center outline-none focus:border-emerald-500 transition-all shadow-inner" placeholder="0" />
@@ -205,7 +204,7 @@ const App: React.FC = () => {
               </div>
             </div>
             <button onClick={handleConfirmGoal} className="w-full bg-emerald-600 text-white py-8 rounded-[36px] font-black hover:bg-emerald-700 shadow-2xl text-2xl transition-all hover:-translate-y-1 active:scale-95 shadow-emerald-500/20">
-              {isScanning ? '正在對標同產業實績大數據...' : '生成減碳建議建議'}
+              {isScanning ? '對標實績資料庫分析中...' : '生成減碳建議建議'}
             </button>
           </div>
         )}

@@ -4,70 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netellus - 企業減碳決策支援系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #059669;
-            --bg-base: #f8fafc;
-        }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            background-color: var(--bg-base);
-            color: #0f172a;
-            overflow-x: hidden;
-        }
-
-        /* 高性能 CSS 科技感背景 */
-        .app-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.1) 0%, transparent 40%);
-            background-color: #f1f5f9;
-        }
-
-        /* 網格系統 */
-        .app-bg::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        /* 動態流光 */
-        .blob {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
-            filter: blur(60px);
-            border-radius: 50%;
-            animation: float 20s infinite alternate ease-in-out;
-        }
-
-        @keyframes float {
-            0% { transform: translate(-10%, -10%) scale(1); }
-            100% { transform: translate(20%, 20%) scale(1.2); }
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
-        }
-
-        input { cursor: text !important; }
-    </style>
+    <!-- 先定義 Import Map 確保模組解析正確 -->
     <script type="importmap">
 {
   "imports": {
@@ -81,13 +18,77 @@
   }
 }
 </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #059669;
+            --bg-base: #f1f5f9;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background-color: var(--bg-base);
+            color: #0f172a;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 強化背景層次 */
+        .app-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: #f1f5f9;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.08) 0%, transparent 45%);
+        }
+
+        .app-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-5%, -5%) scale(1); }
+            100% { transform: translate(15%, 15%) scale(1.1); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        input { cursor: text !important; }
+    </style>
 </head>
 <body>
     <div class="app-bg">
-        <div class="blob" style="top: -10%; left: -10%;"></div>
-        <div class="blob" style="bottom: -10%; right: -10%; animation-delay: -5s;"></div>
+        <div class="blob" style="top: 0%; left: 0%;"></div>
+        <div class="blob" style="bottom: 0%; right: 0%; animation-delay: -10s;"></div>
     </div>
     <div id="root"></div>
-    <script type="module" src="index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
