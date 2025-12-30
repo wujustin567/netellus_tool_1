@@ -24,7 +24,15 @@
             position: relative;
             z-index: 10;
         }
-        /* 針對 Recharts 的小修正，確保在模糊背景下清晰 */
+        /* 確保輸入框在層級上方且滑鼠游標正確 */
+        input, button, select, textarea {
+            position: relative;
+            z-index: 100 !important;
+            cursor: text !important;
+        }
+        button {
+            cursor: pointer !important;
+        }
         .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
             stroke: #f1f5f9;
         }
@@ -45,6 +53,7 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <!-- 移除 ./ 避免某些環境下的 MIME 解析錯誤 -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
