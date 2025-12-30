@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { DatabaseRow, UserGoal, GoalPath } from './types';
+import { DatabaseRow, UserGoal, GoalPath } from './types.ts';
 import { ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from 'recharts';
-import { fetchDatabase } from './services/dataService';
+import { fetchDatabase } from './services/dataService.ts';
 
 const App: React.FC = () => {
   // Database State
@@ -109,7 +108,7 @@ const App: React.FC = () => {
     return directMatches.length === 0 ? industries.slice(0, 3) : directMatches.slice(0, 8); 
   }, [industrySearch, industries]);
 
-  // 提取系統佔比 (Phase 2)
+  // 提取系統佔比
   const systemDistribution = useMemo(() => {
     if (!selectedIndustry) return [];
     const industryRows = db.filter(r => r.案例公司產業別 === selectedIndustry);
@@ -121,13 +120,13 @@ const App: React.FC = () => {
     return Array.from(systemsMap.entries()).map(([name, percentage]) => ({ name, percentage }));
   }, [selectedIndustry, db]);
 
-  // 提取措施佔比 (Phase 3)
+  // 提取措施佔比
   const measureDistribution = useMemo(() => {
     if (!selectedIndustry || !selectedSystem) return [];
     return db.filter(r => r.案例公司產業別 === selectedIndustry && r.系統名稱 === selectedSystem);
   }, [selectedIndustry, selectedSystem, db]);
 
-  // 推薦邏輯 (Phase 1.5 Matching)
+  // 推薦邏輯
   const recommendations = useMemo(() => {
     if (!selectedIndustry || !userGoal || db.length === 0) return null;
     let targetX = userGoal.targetType === 'percentage' 

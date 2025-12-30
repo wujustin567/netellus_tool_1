@@ -1,5 +1,4 @@
-
-import { DatabaseRow } from "../types";
+import { DatabaseRow } from "../types.ts";
 
 // 使用 Google Visualization API 導出 CSV，這對公共表單最穩定
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1RH52lJntYqVS-WW9iVsqFxtN9uWJY7k4Noipt3Tn-qU/gviz/tq?tqx=out:csv&sheet=%E7%B5%90%E6%9E%9C%E7%B8%BD%E8%A1%A8";
