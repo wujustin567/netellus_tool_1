@@ -34,7 +34,10 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
+
+      - name: List build output
+        run: ls -la dist/ || echo "Build output not found"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
