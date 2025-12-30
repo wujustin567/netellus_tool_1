@@ -2,16 +2,12 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-console.log("Netellus App is starting...");
+console.log("Netellus App is starting with React 18.3.1...");
 
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+  root.render(<App />);
 } else {
   console.error("Root element not found");
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from 'recharts';
 import { fetchDatabase } from './services/dataService';
@@ -10,7 +9,6 @@ const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Profile State
-  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [industrySearch, setIndustrySearch] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [taxId, setTaxId] = useState<string>('');
@@ -24,7 +22,6 @@ const App: React.FC = () => {
   const [goalPath, setGoalPath] = useState<GoalPath>('carbon');
   const [currentVal, setCurrentVal] = useState<string>('');
   const [targetVal, setTargetVal] = useState<string>('');
-  const [targetType, setTargetType] = useState<'percentage' | 'absolute'>('percentage');
 
   // Dashboard State
   const [selectedSystem, setSelectedSystem] = useState<string | null>(null);
@@ -37,13 +34,11 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Fetching database...");
     fetchDatabase().then(data => {
-      console.log("Database loaded, rows:", data.length);
       setDb(data);
       setIsDbLoading(false);
     }).catch(err => {
-      console.error("Failed to load database", err);
+      console.error("Database Error:", err);
       setIsDbLoading(false);
     });
   }, []);
@@ -58,49 +53,43 @@ const App: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const resetApp = () => {
-    setIsProfileComplete(false);
-    setShowGoalSetting(false);
-    setSelectedIndustry('');
-    setIndustrySearch('');
-    setTaxId('');
-    setUserGoal(null);
-    setSelectedSystem(null);
-    setSelectedMeasure(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const industries = useMemo(() => 
+    Array.from(new Set(db.map(r => r.案例公司產業別))).filter(Boolean).sort()
+  , [db]);
 
-  const industries = useMemo(() => Array.from(new Set(db.map(r => r.案例公司產業別))).filter(Boolean).sort(), [db]);
+  const isValidIndustry = useMemo(() => 
+    industries.some(ind => ind === industrySearch)
+  , [industrySearch, industries]);
 
   const filteredSuggestions = useMemo(() => {
-    if (!industrySearch) return [];
-    const searchLower = industrySearch.toLowerCase();
+    const searchLower = industrySearch.toLowerCase().trim();
+    if (!searchLower) return industries.slice(0, 10); // 沒輸入時顯示熱門或前幾個
     return industries.filter(ind => ind.toLowerCase().includes(searchLower)).slice(0, 8);
   }, [industrySearch, industries]);
 
   const systemDistribution = useMemo(() => {
-    if (!selectedIndustry || db.length === 0) return [];
-    const industryRows = db.filter(r => r.案例公司產業別 === selectedIndustry);
+    if (!isValidIndustry || db.length === 0) return [];
+    const industryRows = db.filter(r => r.案例公司產業別 === industrySearch);
     const systemsMap = new Map<string, number>();
     industryRows.forEach(r => {
       const pct = parseFloat(r["a_系統佔比(同產業)"]?.replace('%', '')) || 0;
       systemsMap.set(r.系統名稱, pct);
     });
     return Array.from(systemsMap.entries()).map(([name, percentage]) => ({ name, percentage }));
-  }, [selectedIndustry, db]);
+  }, [industrySearch, isValidIndustry, db]);
 
   const measureDistribution = useMemo(() => {
-    if (!selectedIndustry || !selectedSystem || db.length === 0) return [];
-    return db.filter(r => r.案例公司產業別 === selectedIndustry && r.系統名稱 === selectedSystem);
-  }, [selectedIndustry, selectedSystem, db]);
+    if (!isValidIndustry || !selectedSystem || db.length === 0) return [];
+    return db.filter(r => r.案例公司產業別 === industrySearch && r.系統名稱 === selectedSystem);
+  }, [industrySearch, isValidIndustry, selectedSystem, db]);
 
   const recommendations = useMemo(() => {
-    if (!selectedIndustry || !userGoal || db.length === 0) return null;
+    if (!isValidIndustry || !userGoal || db.length === 0) return null;
     let targetX = userGoal.targetType === 'percentage' 
       ? (parseFloat(currentVal) || 0) * (userGoal.targetValue / 100)
       : userGoal.targetValue;
 
-    const industryActions = db.filter(r => r.案例公司產業別 === selectedIndustry);
+    const industryActions = db.filter(r => r.案例公司產業別 === industrySearch);
     if (industryActions.length === 0) return null;
     const parseNum = (s: string) => parseFloat(s?.replace(/,/g, '')) || 0;
 
@@ -112,11 +101,11 @@ const App: React.FC = () => {
     });
 
     return { bestMatch, targetX };
-  }, [selectedIndustry, userGoal, db, currentVal]);
+  }, [industrySearch, isValidIndustry, userGoal, db, currentVal]);
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (industries.includes(selectedIndustry)) {
+    if (isValidIndustry && taxId.length === 8) {
       setIsProfileComplete(true);
       setShowGoalSetting(true);
     }
@@ -125,11 +114,10 @@ const App: React.FC = () => {
   const handleConfirmGoal = () => {
     setIsScanning(true);
     setTimeout(() => {
-      // Corrected targetValue usage from targetVal state variable
       setUserGoal({
         path: goalPath,
         currentValue: parseFloat(currentVal) || 0,
-        targetType: targetType,
+        targetType: 'absolute',
         targetValue: parseFloat(targetVal) || 0
       });
       setIsScanning(false);
@@ -146,143 +134,224 @@ const App: React.FC = () => {
 
   if (isDbLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Loading Netellus Data...</p>
+          <p className="text-emerald-700/60 text-[11px] font-black uppercase tracking-widest">載入大數據庫中...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
+    <div className="min-h-screen relative selection:bg-emerald-100">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="cursor-pointer" onClick={resetApp}>
-            <span className="text-xl font-black tracking-tighter text-slate-900">Netellus</span>
+          <div className="cursor-pointer group flex items-center space-x-2" onClick={() => window.location.reload()}>
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-black transform group-hover:rotate-12 transition-transform">N</div>
+            <span className="text-2xl font-black tracking-tighter text-slate-900">Netellus</span>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 pt-32 pb-20">
+      <main className="container mx-auto px-6 pt-32 pb-32">
         {!isProfileComplete ? (
-          <div className="max-w-md mx-auto bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
-             <h2 className="text-2xl font-black mb-6 text-center">產業路徑診斷</h2>
-             <form onSubmit={handleProfileSubmit} className="space-y-4">
+          <div className="max-w-md mx-auto glass-panel p-10 rounded-[40px] shadow-2xl border border-white/50 relative z-10">
+             <div className="text-center mb-10">
+               <h2 className="text-3xl font-black text-slate-900 mb-2">產業路徑診斷</h2>
+               <p className="text-slate-500 text-sm font-medium italic">企業減碳首選決策支援工具</p>
+             </div>
+
+             <form onSubmit={handleProfileSubmit} className="space-y-6">
                 <div className="relative" ref={suggestionRef}>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">產業搜尋</label>
-                  <input 
-                    type="text" 
-                    value={industrySearch} 
-                    onChange={(e) => { setIndustrySearch(e.target.value); setShowSuggestions(true); }} 
-                    onFocus={() => setShowSuggestions(true)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold outline-none focus:border-emerald-500 transition-all" 
-                    placeholder="輸入關鍵字..." 
-                  />
+                  <label className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2 block ml-1">1. 選擇產業別</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      autoComplete="off"
+                      value={industrySearch} 
+                      onChange={(e) => { 
+                        setIndustrySearch(e.target.value); 
+                        setShowSuggestions(true); 
+                      }} 
+                      onFocus={() => setShowSuggestions(true)}
+                      className={`w-full glass-panel border-2 rounded-2xl px-5 py-4 font-bold outline-none transition-all shadow-inner relative z-20 ${isValidIndustry ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-100 focus:border-emerald-400 focus:bg-white'}`} 
+                      placeholder="輸入關鍵字搜尋，例如：電子..." 
+                    />
+                    {isValidIndustry && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 z-30 pointer-events-none">
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                      </div>
+                    )}
+                  </div>
+                  
                   {showSuggestions && filteredSuggestions.length > 0 && (
-                    <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg">
+                    <div className="absolute z-[100] left-0 right-0 mt-3 glass-panel rounded-3xl overflow-y-auto max-h-60 shadow-2xl border border-slate-200/50 animate-in fade-in zoom-in-95 duration-200">
                       {filteredSuggestions.map((ind, i) => (
-                        <div key={i} onClick={() => { setSelectedIndustry(ind); setIndustrySearch(ind); setShowSuggestions(false); }} className="px-4 py-3 cursor-pointer hover:bg-emerald-50 font-bold text-sm text-slate-600 border-b border-slate-50 last:border-0">{ind}</div>
+                        <div 
+                          key={i} 
+                          onMouseDown={(e) => {
+                            // 使用 onMouseDown 防止點擊時觸發 blur 導致選單消失
+                            e.preventDefault();
+                            setIndustrySearch(ind); 
+                            setShowSuggestions(false); 
+                          }} 
+                          className={`px-6 py-4 cursor-pointer hover:bg-emerald-600 hover:text-white font-bold text-sm transition-colors border-b border-slate-50 last:border-0 ${industrySearch === ind ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700'}`}
+                        >
+                          {ind}
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
+
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">公司統編</label>
-                  <input required type="text" maxLength={8} value={taxId} onChange={(e) => setTaxId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold outline-none focus:border-emerald-500 transition-all" placeholder="8位數字" />
+                  <label className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2 block ml-1">2. 公司統一編號</label>
+                  <input 
+                    required 
+                    type="text" 
+                    maxLength={8} 
+                    autoComplete="off"
+                    value={taxId} 
+                    onChange={(e) => setTaxId(e.target.value.replace(/\D/g, ''))} 
+                    className="w-full glass-panel border-2 border-slate-100 rounded-2xl px-5 py-4 font-bold outline-none focus:border-emerald-400 focus:bg-white transition-all shadow-inner relative z-10" 
+                    placeholder="請輸入 8 位統編數字" 
+                  />
                 </div>
-                <button type="submit" disabled={!industries.includes(selectedIndustry)} className="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-600 transition-all disabled:opacity-30">分析產業數據</button>
+
+                <div className="pt-4">
+                  <button 
+                    type="submit" 
+                    disabled={!isValidIndustry || taxId.length !== 8} 
+                    className={`w-full py-5 rounded-2xl font-black shadow-xl transition-all text-lg relative overflow-hidden group ${isValidIndustry && taxId.length === 8 ? 'bg-emerald-600 text-white hover:bg-emerald-700 hover:-translate-y-1 active:scale-95' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                  >
+                    <span className="relative z-10">{isValidIndustry && taxId.length === 8 ? '進入減碳診斷' : '完成上方資訊以送出'}</span>
+                    {(isValidIndustry && taxId.length === 8) && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>}
+                  </button>
+                  {!isValidIndustry && industrySearch.length > 0 && (
+                    <p className="text-center text-[10px] font-bold text-rose-500 mt-4 uppercase tracking-widest animate-pulse">請點擊下拉選單選取確切產業名稱</p>
+                  )}
+                </div>
              </form>
           </div>
         ) : showGoalSetting ? (
-          <div className="max-w-xl mx-auto bg-white p-10 rounded-3xl border border-slate-200 text-center shadow-xl">
-            <h2 className="text-2xl font-black mb-8">設定年度減碳目標</h2>
-            <div className="flex space-x-2 mb-8">
-              <button onClick={() => setGoalPath('carbon')} className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalPath === 'carbon' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>減碳</button>
-              <button onClick={() => setGoalPath('energy')} className={`flex-1 py-3 rounded-xl font-bold transition-all ${goalPath === 'energy' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>節能</button>
+          <div className="max-w-2xl mx-auto glass-panel p-12 rounded-[40px] text-center shadow-2xl border border-white/50 animate-in fade-in slide-in-from-bottom-10 duration-500">
+            <h2 className="text-3xl font-black mb-10 text-slate-900">設定您的年度目標</h2>
+            <div className="flex p-1.5 bg-slate-100 rounded-2xl mb-10">
+              <button onClick={() => setGoalPath('carbon')} className={`flex-1 py-4 rounded-xl font-black transition-all ${goalPath === 'carbon' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>碳排放減量</button>
+              <button onClick={() => setGoalPath('energy')} className={`flex-1 py-4 rounded-xl font-black transition-all ${goalPath === 'energy' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>節約總用電</button>
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <input type="number" value={currentVal} onChange={(e) => setCurrentVal(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xl font-bold text-center outline-none focus:border-emerald-500" placeholder="目前值" />
-              <input type="number" value={targetVal} onChange={(e) => setTargetVal(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xl font-bold text-center outline-none focus:border-emerald-500" placeholder="目標值" />
+            <div className="grid grid-cols-2 gap-6 mb-10">
+              <div className="text-left space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">目前基準值 ({goalPath === 'carbon' ? '噸 tCO2e' : '度 kWh'})</label>
+                <input type="number" autoComplete="off" value={currentVal} onChange={(e) => setCurrentVal(e.target.value)} className="w-full glass-panel border-2 border-slate-100 rounded-2xl p-5 text-2xl font-black text-center outline-none focus:border-emerald-500 transition-all" placeholder="0" />
+              </div>
+              <div className="text-left space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">年度目標值 ({goalPath === 'carbon' ? '噸 tCO2e' : '度 kWh'})</label>
+                <input type="number" autoComplete="off" value={targetVal} onChange={(e) => setTargetVal(e.target.value)} className="w-full glass-panel border-2 border-slate-100 rounded-2xl p-5 text-2xl font-black text-center outline-none focus:border-emerald-500 transition-all" placeholder="0" />
+              </div>
             </div>
-            <button onClick={handleConfirmGoal} className="w-full bg-emerald-500 text-white py-5 rounded-xl font-bold hover:bg-emerald-600 shadow-lg">生成對標方案</button>
+            <button onClick={handleConfirmGoal} className="w-full bg-emerald-600 text-white py-6 rounded-3xl font-black hover:bg-emerald-700 shadow-2xl text-xl transition-all hover:-translate-y-1 active:scale-95">
+              {isScanning ? '正在對標大數據...' : '生成減碳路徑建議'}
+            </button>
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-12 max-w-6xl mx-auto animate-in fade-in duration-700">
             {recommendations && (
-              <section className="bg-slate-900 p-8 rounded-3xl text-white shadow-2xl">
-                <span className="text-[10px] font-bold text-emerald-400 tracking-widest uppercase mb-2 block">建議首選方案</span>
-                <h2 className="text-3xl font-black mb-8">{recommendations.bestMatch.系統名稱}</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <p className="text-[9px] font-bold text-white/40 uppercase mb-1">預期減碳</p>
-                    <p className="text-xl font-black">{formatDbValue(recommendations.bestMatch.c_碳減量中位數)} <span className="text-[10px]">噸</span></p>
+              <section className="bg-slate-900 p-10 rounded-[50px] text-white shadow-3xl overflow-hidden relative border border-white/5">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 blur-[120px] rounded-full -mr-20 -mt-20"></div>
+                <div className="relative z-10">
+                  <span className="inline-block px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[11px] font-black text-emerald-400 tracking-widest uppercase mb-6">對標分析結果：首選建議系統</span>
+                  <h2 className="text-4xl md:text-5xl font-black mb-12 leading-tight">依據您的產業屬性，<br/>建議優先建置：<span className="text-emerald-400">{recommendations.bestMatch.系統名稱}</span></h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="bg-white/5 p-7 rounded-[32px] border border-white/10 backdrop-blur-md">
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">預期年減量</p>
+                      <p className="text-3xl font-black text-emerald-50">{formatDbValue(recommendations.bestMatch.c_碳減量中位數)} <span className="text-sm font-medium opacity-40">tCO2e</span></p>
+                    </div>
+                    <div className="bg-white/5 p-7 rounded-[32px] border border-white/10 backdrop-blur-md">
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">預估投資成本</p>
+                      <p className="text-3xl font-black text-emerald-50">{formatDbValue(recommendations.bestMatch.c_投資成本中位數)} <span className="text-sm font-medium opacity-40">萬</span></p>
+                    </div>
+                    <div className="bg-white/5 p-7 rounded-[32px] border border-white/10 backdrop-blur-md">
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">平均回收期</p>
+                      <p className="text-3xl font-black text-emerald-50">{formatDbValue(recommendations.bestMatch.c_回收年限中位數)} <span className="text-sm font-medium opacity-40">年</span></p>
+                    </div>
+                    <button onClick={() => window.open('https://rfq.netellus.com/rfq/create', '_blank')} className="bg-emerald-500 text-white rounded-[32px] font-black hover:bg-emerald-400 transition-all text-sm shadow-xl shadow-emerald-500/20 group relative overflow-hidden">
+                      <span className="relative z-10">獲取供應商報價</span>
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    </button>
                   </div>
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <p className="text-[9px] font-bold text-white/40 uppercase mb-1">投資成本</p>
-                    <p className="text-xl font-black">{formatDbValue(recommendations.bestMatch.c_投資成本中位數)} <span className="text-[10px]">萬</span></p>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <p className="text-[9px] font-bold text-white/40 uppercase mb-1">回收年限</p>
-                    <p className="text-xl font-black">{formatDbValue(recommendations.bestMatch.c_回收年限中位數)} <span className="text-[10px]">年</span></p>
-                  </div>
-                  <button onClick={() => window.open('https://rfq.netellus.com/rfq/create', '_blank')} className="bg-emerald-500 text-white rounded-2xl font-bold hover:bg-emerald-400 transition-all text-sm">獲取報價</button>
                 </div>
               </section>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-4 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h3 className="text-lg font-black mb-6">產業能耗分佈</h3>
-                <div className="h-64 w-full relative mb-6">
+              <div className="lg:col-span-4 glass-panel p-10 rounded-[40px] border border-white/60 shadow-xl">
+                <h3 className="text-xl font-black mb-10 text-slate-800 border-l-4 border-emerald-500 pl-4">產業能耗分佈</h3>
+                <div className="h-64 w-full relative mb-12">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={systemDistribution} dataKey="percentage" cx="50%" cy="50%" innerRadius="70%" outerRadius="90%" paddingAngle={5} onClick={(_, idx) => setSelectedSystem(systemDistribution[idx].name)}>
-                        {systemDistribution.map((e: any, i: number) => <Cell key={i} fill={selectedSystem === e.name ? '#10b981' : '#f1f5f9'} className="cursor-pointer" />)}
+                      <Pie data={systemDistribution} dataKey="percentage" cx="50%" cy="50%" innerRadius="75%" outerRadius="95%" paddingAngle={8} onClick={(_, idx) => {
+                        setSelectedSystem(systemDistribution[idx].name);
+                        setSelectedMeasure(null);
+                      }}>
+                        {systemDistribution.map((e: any, i: number) => <Cell key={i} fill={selectedSystem === e.name ? '#10b981' : '#f1f5f9'} stroke="none" className="outline-none cursor-pointer" />)}
                       </Pie>
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-3xl font-black text-slate-900">{systemDistribution.find(s => s.name === selectedSystem)?.percentage || 0}%</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">系統佔比</span>
+                    <span className="text-5xl font-black text-slate-900">{systemDistribution.find(s => s.name === selectedSystem)?.percentage || 0}%</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">電力佔比</span>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {systemDistribution.map(sys => (
-                    <button key={sys.name} onClick={() => { setSelectedSystem(sys.name); setSelectedMeasure(null); }} className={`w-full p-4 rounded-xl text-left flex justify-between items-center font-bold border-2 transition-all ${selectedSystem === sys.name ? 'border-emerald-500 bg-emerald-50' : 'border-slate-50'}`}>
-                      <span className="text-xs">{sys.name}</span>
-                      <span className="text-[10px] bg-slate-100 px-2 py-1 rounded-full">{sys.percentage}%</span>
+                    <button key={sys.name} onClick={() => { setSelectedSystem(sys.name); setSelectedMeasure(null); }} className={`w-full p-6 rounded-2xl text-left flex justify-between items-center font-black border-2 transition-all ${selectedSystem === sys.name ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-md scale-[1.02]' : 'border-slate-50 text-slate-500 hover:border-slate-200'}`}>
+                      <span className="text-sm">{sys.name}</span>
+                      <span className="text-xs bg-white px-3 py-1.5 rounded-full shadow-sm">{sys.percentage}%</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="lg:col-span-8 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm min-h-[500px]">
-                <h3 className="text-lg font-black mb-6">對標措施：{selectedSystem || '請選擇左側系統'}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {measureDistribution.map((m: any, i: number) => (
-                    <button key={i} onClick={() => setSelectedMeasure(m)} className={`p-6 rounded-2xl text-left border-2 transition-all ${selectedMeasure?.措施類型 === m.措施類型 ? 'border-emerald-500 bg-emerald-50' : 'border-slate-50 bg-slate-50 hover:bg-white'}`}>
-                      <p className="font-bold text-sm mb-2">{m.措施類型}</p>
-                      <p className="text-[9px] font-bold text-emerald-600 uppercase">普及率 {m["b_措施佔比(同產業×系統)"]}</p>
-                    </button>
-                  ))}
+              <div className="lg:col-span-8 glass-panel p-10 rounded-[40px] border border-white/60 shadow-xl min-h-[650px]">
+                <div className="flex justify-between items-center mb-12">
+                  <h3 className="text-2xl font-black text-slate-800">可對標減量措施：<span className="text-emerald-600">{selectedSystem || '未選擇系統'}</span></h3>
                 </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {measureDistribution.length > 0 ? measureDistribution.map((m: any, i: number) => (
+                    <button key={i} onClick={() => setSelectedMeasure(m)} className={`p-8 rounded-[32px] text-left border-2 transition-all relative overflow-hidden group ${selectedMeasure?.措施類型 === m.措施類型 ? 'border-emerald-500 bg-emerald-50 ring-8 ring-emerald-500/5' : 'border-slate-50 bg-slate-50/50 hover:bg-white hover:border-slate-200 shadow-sm'}`}>
+                      <p className="font-black text-slate-900 text-lg mb-4">{m.措施類型}</p>
+                      <div className="flex items-center">
+                        <span className="text-[10px] bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg font-black uppercase tracking-wider">產業普及率 {m["b_措施佔比(同產業×系統)"]}</span>
+                      </div>
+                    </button>
+                  )) : (
+                    <div className="col-span-2 flex items-center justify-center py-20 border-2 border-dashed border-slate-200 rounded-[40px]">
+                      <p className="text-slate-400 font-bold">請先從左側選擇能源系統以查看對標措施</p>
+                    </div>
+                  )}
+                </div>
+
                 {selectedMeasure && (
-                  <div className="mt-8 pt-8 border-t border-slate-100 animate-in slide-in-from-bottom-4">
-                    <div className="grid grid-cols-3 gap-4">
-                       <div className="p-4 bg-slate-900 rounded-2xl text-white">
-                         <p className="text-[8px] opacity-40 uppercase mb-1">節能潛力</p>
-                         <p className="text-lg font-black">{formatDbValue(selectedMeasure.c_節能潛力中位數, 1000)} <span className="text-[9px]">度</span></p>
+                  <div className="mt-14 pt-12 border-t-2 border-slate-100 animate-in fade-in slide-in-from-bottom-8 duration-500">
+                    <div className="grid grid-cols-3 gap-6">
+                       <div className="p-8 bg-slate-900 rounded-[32px] text-white shadow-2xl relative overflow-hidden group">
+                         <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 blur-2xl rounded-full"></div>
+                         <p className="text-[10px] opacity-40 uppercase font-black tracking-widest mb-3">預估節電潛力</p>
+                         <p className="text-3xl font-black text-emerald-50">{formatDbValue(selectedMeasure.c_節能潛力中位數, 1000)} <span className="text-xs font-medium opacity-40">kWh</span></p>
                        </div>
-                       <div className="p-4 bg-slate-900 rounded-2xl text-white">
-                         <p className="text-[8px] opacity-40 uppercase mb-1">預計投資</p>
-                         <p className="text-lg font-black">{formatDbValue(selectedMeasure.c_投資成本中位數)} <span className="text-[9px]">萬</span></p>
+                       <div className="p-8 bg-slate-900 rounded-[32px] text-white shadow-2xl relative overflow-hidden group">
+                         <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 blur-2xl rounded-full"></div>
+                         <p className="text-[10px] opacity-40 uppercase font-black tracking-widest mb-3">平均投資金額</p>
+                         <p className="text-3xl font-black text-emerald-50">{formatDbValue(selectedMeasure.c_投資成本中位數)} <span className="text-xs font-medium opacity-40">萬 TWD</span></p>
                        </div>
-                       <div className="p-4 bg-slate-900 rounded-2xl text-white">
-                         <p className="text-[8px] opacity-40 uppercase mb-1">回收期</p>
-                         <p className="text-lg font-black">{formatDbValue(selectedMeasure.c_回收年限中位數)} <span className="text-[9px]">年</span></p>
+                       <div className="p-8 bg-slate-900 rounded-[32px] text-white shadow-2xl relative overflow-hidden group">
+                         <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 blur-2xl rounded-full"></div>
+                         <p className="text-[10px] opacity-40 uppercase font-black tracking-widest mb-3">單位減碳成本</p>
+                         <p className="text-3xl font-black text-emerald-50">{formatDbValue(selectedMeasure.c_單位減碳成本中位數)} <span className="text-xs font-medium opacity-40">元/t</span></p>
                        </div>
                     </div>
                   </div>
