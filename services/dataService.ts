@@ -1,15 +1,13 @@
-import { DatabaseRow } from "../types.ts";
+import { DatabaseRow } from "../types";
 
-// 使用 Google Visualization API 導出 CSV，這對公共表單最穩定
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1RH52lJntYqVS-WW9iVsqFxtN9uWJY7k4Noipt3Tn-qU/gviz/tq?tqx=out:csv&sheet=%E7%B5%90%E6%9E%9C%E7%B8%BD%E8%A1%A8";
 
 export async function fetchDatabase(): Promise<DatabaseRow[]> {
   try {
     const response = await fetch(SHEET_URL);
-    if (!response.ok) throw new Error("無法連接到資料庫");
+    if (!response.ok) throw new Error("Database link failed");
     const text = await response.text();
     
-    // 簡易 CSV 解析 (處理引號與逗號)
     const lines = text.split(/\r?\n/);
     if (lines.length < 2) return [];
 
@@ -38,14 +36,14 @@ export async function fetchDatabase(): Promise<DatabaseRow[]> {
         const values = parseLine(line);
         const obj: any = {};
         headers.forEach((header, i) => {
-          obj[header] = values[i] || "";
+          obj[header] = values[i]?.replace(/^"|"$/g, '') || "";
         });
         return obj;
       });
 
     return rows;
   } catch (error) {
-    console.error("Database fetch error:", error);
+    console.error("Fetch error:", error);
     return [];
   }
 }

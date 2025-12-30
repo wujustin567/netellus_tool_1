@@ -12,30 +12,10 @@
             font-family: 'Inter', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2560');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             background-color: #f8fafc;
         }
-        #root {
-            position: relative;
-            z-index: 10;
-        }
-        /* 確保輸入框在層級上方且滑鼠游標正確 */
-        input, button, select, textarea {
-            position: relative;
-            z-index: 100 !important;
-            cursor: text !important;
-        }
-        button {
-            cursor: pointer !important;
-        }
-        .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
-            stroke: #f1f5f9;
-        }
+        #root { position: relative; z-index: 10; }
+        input { cursor: text !important; }
     </style>
     <script type="importmap">
 {
@@ -53,7 +33,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <!-- 移除 ./ 避免某些環境下的 MIME 解析錯誤 -->
     <script type="module" src="index.tsx"></script>
 </body>
 </html>
