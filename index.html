@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2560');
+            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2560');
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
@@ -22,19 +22,21 @@
         }
         #root {
             position: relative;
-            z-index: 1;
+            z-index: 10;
+        }
+        /* 針對 Recharts 的小修正，確保在模糊背景下清晰 */
+        .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
+            stroke: #f1f5f9;
         }
     </style>
-    <!-- 引入 Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 修正 Import Map：嚴格鎖定 React 18 版本，移除任何 React 19 的參照 -->
     <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@18.3.1",
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -43,6 +45,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" data-type="module" data-presets="env,react,typescript" src="./index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

@@ -40,7 +40,7 @@ export async function fetchDatabase(): Promise<DatabaseRow[]> {
         headers.forEach((header, i) => {
           obj[header] = values[i] || "";
         });
-        return obj as DatabaseRow;
+        return obj;
       });
 
     return rows;
