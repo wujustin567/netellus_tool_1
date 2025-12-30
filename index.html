@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            /* 調整背景漸層：大幅降低白色遮罩的不透明度，解決圖片模糊與「霧濛濛」的感覺 */
+            /* 調整背景漸層 */
             background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2560');
             background-attachment: fixed;
             background-size: cover;
@@ -26,29 +26,25 @@
             position: relative;
             z-index: 1;
         }
-        .no-shadow {
-            box-shadow: none !important;
-        }
     </style>
     <!-- 引入 Babel 以在瀏覽器中編譯 TSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script type="importmap">
 {
   "imports": {
-    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react/jsx-runtime": "https://esm.sh/react@19.0.0/jsx-runtime",
     "react": "https://esm.sh/react@19.0.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
-    <!-- 主要入口腳本：注意 type="text/babel" 和 data-type="module" -->
+    <!-- 單一入口腳本：將所有邏輯合併至此以確保瀏覽器能正確執行 -->
     <script type="text/babel" data-type="module" src="./index.tsx"></script>
 </body>
 </html>
