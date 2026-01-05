@@ -4,12 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netellus - 企業減碳決策支援系統</title>
+    <!-- 修正 Import Map：嚴格鎖定 React 18 版本，移除任何 React 19 的參照以避免衝突 -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #059669;
+            --primary: #064E3B; /* Netellus Dark Green */
             --bg-base: #f1f5f9;
         }
         body {
@@ -21,60 +35,50 @@
             min-height: 100vh;
         }
 
-        /* 強化背景層次 */
+        /* 強化背景層次 (V3.0 固定背景) */
         .app-bg {
             position: fixed;
             inset: 0;
             z-index: -1;
             background-color: #f1f5f9;
-            background-image:
-                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.08) 0%, transparent 45%);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(6, 78, 59, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 45%);
         }
 
         .app-bg::before {
             content: "";
             position: absolute;
             inset: 0;
-            background-image:
-                linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
             pointer-events: none;
         }
 
-        .blob {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-            filter: blur(80px);
-            border-radius: 50%;
-            animation: float 25s infinite alternate ease-in-out;
-        }
-
-        @keyframes float {
-            0% { transform: translate(-5%, -5%) scale(1); }
-            100% { transform: translate(15%, 15%) scale(1.1); }
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08);
+        /* V3.0 Visual Spec: Flat, Clean, No Shadow Cards */
+        .netellus-card {
+            background: #FFFFFF;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px; /* 8px 圓角規範 */
         }
 
         input { cursor: text !important; }
+        
+        /* Disable number input spinner */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
     </style>
+    <!-- 引入 Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <div class="app-bg">
-        <div class="blob" style="top: 0%; left: 0%;"></div>
-        <div class="blob" style="bottom: 0%; right: 0%; animation-delay: -10s;"></div>
-    </div>
+    <div class="app-bg"></div>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="text/babel" data-type="module" data-presets="env,react,typescript" src="./index.tsx"></script>
 </body>
 </html>
