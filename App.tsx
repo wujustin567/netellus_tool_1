@@ -382,11 +382,11 @@ const App: React.FC = () => {
                         setShowSuggestions(true); 
                       }} 
                       onFocus={() => setShowSuggestions(true)}
-                      className="w-full h-14 rounded-xl text-lg transition-all" 
+                      className="w-full h-14 rounded-3xl text-lg transition-all bg-gray-50 border-gray-200 focus:border-[#34FF5B]" 
                       placeholder="請輸入關鍵字搜尋..." 
                     />
                     {showSuggestions && filteredSuggestions.length > 0 && (
-                        <div className="absolute z-[120] top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden max-h-60 overflow-y-auto text-left">
+                        <div className="absolute z-[120] top-full left-0 right-0 mt-2 bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden max-h-60 overflow-y-auto text-left">
                         {filteredSuggestions.map((ind, i) => (
                             <div 
                             key={i} 
@@ -413,7 +413,7 @@ const App: React.FC = () => {
                             type="tel" 
                             value={phone} 
                             onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} 
-                            className={`w-full h-14 rounded-xl text-lg ${phone && !isPhoneValid ? 'border-red-300 bg-red-50' : ''}`}
+                            className={`w-full h-14 rounded-3xl text-lg bg-gray-50 border-gray-200 focus:border-[#34FF5B] ${phone && !isPhoneValid ? 'border-red-300 bg-red-50' : ''}`}
                             placeholder="09xxxxxxxx" 
                         />
                     </div>
@@ -425,7 +425,7 @@ const App: React.FC = () => {
                             maxLength={8} 
                             value={taxId} 
                             onChange={(e) => setTaxId(e.target.value.replace(/\D/g, ''))} 
-                            className="w-full h-14 rounded-xl text-lg" 
+                            className="w-full h-14 rounded-3xl text-lg bg-gray-50 border-gray-200 focus:border-[#34FF5B]" 
                             placeholder="8 位數統編" 
                         />
                     </div>
@@ -498,7 +498,7 @@ const App: React.FC = () => {
                       inputMode="numeric"
                       value={currentVal} 
                       onChange={(e) => handleFormattedChange(e, setCurrentVal)} 
-                      className="w-full h-16 text-3xl" 
+                      className="w-full h-16 text-3xl rounded-3xl bg-gray-50 border-gray-200 focus:border-[#34FF5B]" 
                       placeholder="0" 
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{goalPath === 'carbon' ? 'tCO2e' : 'kWh'}</span>
@@ -532,7 +532,7 @@ const App: React.FC = () => {
                           if (targetMethod === 'percentage') setTargetVal(e.target.value);
                           else handleFormattedChange(e, setTargetVal);
                       }}
-                      className="w-full h-16 text-3xl" 
+                      className="w-full h-16 text-3xl rounded-3xl bg-gray-50 border-gray-200 focus:border-[#34FF5B]" 
                       placeholder="0" 
                    />
                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{targetMethod === 'percentage' ? '%' : (goalPath === 'carbon' ? 'tCO2e' : 'kWh')}</span>
