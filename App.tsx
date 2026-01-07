@@ -6,7 +6,7 @@ import { DatabaseRow, UserGoal, GoalPath } from './types.ts';
 const BackButton = ({ onClick }: { onClick: () => void }) => (
   <button 
       onClick={onClick}
-      className="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center gap-1.5 px-3 py-2 -ml-3 rounded-lg hover:bg-slate-100/50 w-fit transition-colors"
+      className="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center gap-1.5 px-3 py-2 -ml-3 rounded-lg hover:bg-slate-100/50 w-fit transition-colors relative z-10"
   >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
       <span>返回修改</span>
@@ -21,11 +21,19 @@ const MainContainer = ({ children, className = "" }: { children?: React.ReactNod
     </div>
 );
 
+const CurrentIndustryBadge = ({ industry }: { industry: string }) => (
+    <div className="absolute top-8 right-8 hidden md:block">
+        <div className="text-right">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Industry Focus</p>
+            <p className="font-bold text-slate-800 text-sm">{industry}</p>
+        </div>
+    </div>
+);
+
 const App: React.FC = () => {
   const [db, setDb] = useState<DatabaseRow[]>([]);
   const [isDbLoading, setIsDbLoading] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
-
+  
   // Profile State
   const [industrySearch, setIndustrySearch] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -319,6 +327,16 @@ const App: React.FC = () => {
     );
   }
 
+  if (db.length === 0) {
+    return (
+        <MainContainer className="max-w-md text-center py-10">
+            <h3 className="text-xl font-bold text-red-600 mb-4">無法載入資料庫</h3>
+            <p className="text-slate-600 mb-6">請檢查您的網路連線或稍後再試。</p>
+            <button onClick={() => window.location.reload()} className="btn-cta px-6 py-3">重新整理</button>
+        </MainContainer>
+    );
+  }
+
   // --- Views ---
 
   // 1. Profile View
@@ -411,6 +429,8 @@ const App: React.FC = () => {
              <div className="absolute top-8 left-8">
                 <BackButton onClick={handleBackToProfile} />
              </div>
+             <CurrentIndustryBadge industry={industrySearch} />
+             
              <h2 className="text-3xl font-black mb-8 mt-4 text-[#111827]">您是否有明確的年度減量目標？</h2>
              <div className="space-y-4">
                 <button 
@@ -437,6 +457,8 @@ const App: React.FC = () => {
             <div className="absolute top-8 left-8">
                 <BackButton onClick={handleBackToGoalChoice} />
             </div>
+            <CurrentIndustryBadge industry={industrySearch} />
+            
             <div className="text-center mb-10 mt-2">
                 <h2 className="text-3xl font-black text-[#111827]">設定減碳目標</h2>
             </div>
