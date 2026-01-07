@@ -186,7 +186,28 @@ const App: React.FC = () => {
             targetGap: 0
         };
     } else {
-        validActions = validActions.sort((a, b) => getValue(b, path) - getValue(a, path));
+        // Updated Sorting Logic: "Best Fit" (Closest to target but meeting it)
+        validActions = validActions.sort((a, b) => {
+            const valA = getValue(a, path);
+            const valB = getValue(b, path);
+            
+            const aMeets = valA >= targetGap;
+            const bMeets = valB >= targetGap;
+
+            if (aMeets && bMeets) {
+                // Both meet target: choose the one closer to target (smaller value) to avoid over-investment
+                return valA - valB; // Ascending order
+            } else if (aMeets && !bMeets) {
+                // A meets, B doesn't: A comes first
+                return -1;
+            } else if (!aMeets && bMeets) {
+                // B meets, A doesn't: B comes first
+                return 1;
+            } else {
+                // Neither meets: choose the largest one to maximize impact (for combo strategy)
+                return valB - valA; // Descending order
+            }
+        });
         
         const primaryAction = validActions[0];
         if (!primaryAction) return { type: 'none', items: [], targetGap };
@@ -425,23 +446,23 @@ const App: React.FC = () => {
   // 2. Goal Selection View
   if (goalMode === 'unset') {
       return (
-          <MainContainer className="max-w-xl text-center">
+          <MainContainer className="max-w-xl text-center min-h-[480px] flex flex-col justify-center py-16 md:py-24">
              <div className="absolute top-8 left-8">
                 <BackButton onClick={handleBackToProfile} />
              </div>
              <CurrentIndustryBadge industry={industrySearch} />
              
-             <h2 className="text-3xl font-black mb-8 mt-4 text-[#111827]">您是否有明確的年度減量目標？</h2>
-             <div className="space-y-4">
+             <h2 className="text-3xl font-black mb-12 text-[#111827]">您是否有明確的年度減量目標？</h2>
+             <div className="space-y-6">
                 <button 
                     onClick={() => setGoalMode('has_goal_input')}
-                    className="w-full py-5 btn-cta text-lg"
+                    className="w-full h-16 btn-cta text-lg shadow-lg shadow-green-400/20"
                 >
                     我有明確目標
                 </button>
                 <button 
                     onClick={handleNoGoal}
-                    className="w-full py-5 bg-white border-2 border-slate-200 text-slate-500 font-bold rounded-2xl hover:border-slate-300 hover:text-slate-700 transition-all"
+                    className="w-full h-16 bg-white border-2 border-slate-200 text-slate-500 font-bold rounded-2xl hover:border-slate-300 hover:text-slate-700 transition-all"
                 >
                     我目前沒有目標，請提供建議
                 </button>
