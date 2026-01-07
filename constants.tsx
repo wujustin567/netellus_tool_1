@@ -1,4 +1,4 @@
-import { IndustryData } from './types';
+import { IndustryData } from './types.ts';
 
 export const INDUSTRIES: IndustryData[] = [
   {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import App from './App.tsx';
 
-console.log("Netellus App is starting with React 18.3.1...");
+console.log("Netellus App is starting with React 18...");
 
 const container = document.getElementById('root');
 if (container) {

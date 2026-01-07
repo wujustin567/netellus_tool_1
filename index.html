@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netellus - 企業減碳決策支援系統</title>
     
-    <!-- Import Map: Pinned to stable versions to prevent React instance duplication -->
+    <!-- Import Map: Strict React 18.2.0 to prevent version conflicts -->
     <script type="importmap">
 {
   "imports": {
@@ -23,817 +23,117 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     
     <!-- Babel for JSX compilation in browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         :root {
-            --primary: #064E3B; /* Netellus Dark Green */
-            --accent-cta: #34FF5B; /* Neon Green CTA */
-            --text-title: #111827;
-            --input-bg: #F3F4F6;
+            --primary: #064E3B; /* Netellus Dark Green - Text & Accents */
+            --cta-green: #34FF5B; /* Neon Green - Main Buttons */
+            --bg-base: #f1f5f9;
         }
+        
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            background-color: #f1f5f9; /* Fallback */
-            color: #111827;
+            color: #111827; /* Dark Blue-Black */
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        /* V3.0 Visual Spec: Forest Background */
+        /* 1. Global Forest Background */
         .app-bg {
             position: fixed;
             inset: 0;
             z-index: -1;
-            background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2074&auto=format&fit=crop');
+            background-image: url('https://images.unsplash.com/photo-1448375240586-dfd8d395ea6c?q=80&w=2070&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
         }
-        /* Dark overlay for readability if needed, but keeping it light as per spec to show forest */
+        
+        /* Slight overlay to ensure card pop */
         .app-bg::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.1); /* Slight dim */
+            background: rgba(0, 0, 0, 0.15);
         }
 
-        /* Card Styling - Spec: White, 32px Radius, No Shadow, Flat */
+        /* 2. Main Card: Ultra Rounded, No Shadow */
         .netellus-card {
             background: #FFFFFF;
             border-radius: 32px;
-            box-shadow: none; /* Flat design */
             border: none;
-            overflow: hidden; /* Ensure content respects radius */
+            box-shadow: none;
         }
 
-        /* Input Styling - Spec: Light Gray #F3F4F6, Centered, Bold */
-        .netellus-input {
-            background-color: var(--input-bg);
-            border: 1px solid #E5E7EB;
-            border-radius: 12px;
-            color: #111827;
+        /* 3. Input Styling: Centered & Bold */
+        input { 
+            cursor: text !important; 
+            text-align: center; 
             font-weight: 700;
-            text-align: center;
-            transition: all 0.2s;
+            background-color: #F3F4F6 !important;
+            border: 1px solid #E5E7EB;
         }
-        .netellus-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: #fff;
-        }
-        .netellus-input::placeholder {
-            color: #9CA3AF;
-            font-weight: 500;
-        }
-
-        /* Button Styling - Spec: Neon Green #34FF5B, Black Text, 16px+ Radius */
-        .netellus-btn-primary {
-            background-color: var(--accent-cta);
-            color: #000000;
-            border-radius: 16px;
-            font-weight: 800;
-            transition: transform 0.1s, filter 0.2s;
-        }
-        .netellus-btn-primary:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-        .netellus-btn-primary:active {
-            transform: translateY(0);
-        }
-        .netellus-btn-primary:disabled {
-            background-color: #E5E7EB;
-            color: #9CA3AF;
-            cursor: not-allowed;
-            transform: none;
-            filter: none;
-        }
-
-        input { cursor: text !important; }
         
-        /* Disable number input spinner */
+        input:focus {
+            border-color: var(--primary) !important;
+            outline: none;
+        }
+        
+        input::placeholder {
+            font-weight: 500;
+            opacity: 0.4;
+        }
+        
+        /* Hide number spinners */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
           -webkit-appearance: none; 
           margin: 0; 
         }
         
-        /* Custom Scrollbar for dropdowns */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        /* 4. Button: Neon Green */
+        .btn-cta {
+            background-color: var(--cta-green);
+            color: #000000;
+            font-weight: 700;
+            border-radius: 16px; /* Approx 2xl */
+            transition: all 0.2s ease;
         }
-        
+        .btn-cta:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+        .btn-cta:active {
+            transform: translateY(0);
+        }
+
         /* Animations */
-        .animate-in { animation-duration: 0.6s; animation-fill-mode: both; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-in { animation-duration: 0.5s; animation-fill-mode: both; }
         .fade-in { animation-name: fadeIn; }
         .zoom-in { animation-name: zoomIn; }
-        .slide-up { animation-name: slideUp; }
+        .slide-in-up { animation-name: slideInUp; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideUp { from { transform: translateY(2rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="app-bg"></div>
+    
+    <!-- Logo Fixed Top Left -->
+    <div style="position: fixed; top: 24px; left: 24px; z-index: 50; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 40px; height: 40px; background: #064E3B; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 20px;">N</div>
+        <span style="font-weight: 800; color: white; font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Netellus</span>
+    </div>
+
     <div id="root"></div>
 
-    <!-- Main Application Logic (Converted from Typescript to JS for Browser) -->
-    <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useMemo, useRef } from 'react';
-        import { createRoot } from 'react-dom/client';
-        import { ResponsiveContainer, Cell, PieChart, Pie, Tooltip } from 'recharts';
-
-        // --- Data Service ---
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1RH52lJntYqVS-WW9iVsqFxtN9uWJY7k4Noipt3Tn-qU/gviz/tq?tqx=out:csv&sheet=%E7%B5%90%E6%9E%9C%E7%B8%BD%E8%A1%A8";
-
-        async function fetchDatabase() {
-            try {
-                const response = await fetch(SHEET_URL);
-                if (!response.ok) throw new Error("Database link failed");
-                const text = await response.text();
-                
-                const lines = text.split(/\r?\n/);
-                if (lines.length < 2) return [];
-
-                const parseLine = (line) => {
-                    const result = [];
-                    let current = "";
-                    let inQuotes = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') inQuotes = !inQuotes;
-                        else if (char === ',' && !inQuotes) {
-                            result.push(current.trim());
-                            current = "";
-                        } else {
-                            current += char;
-                        }
-                    }
-                    result.push(current.trim());
-                    return result;
-                };
-
-                const headers = parseLine(lines[0]);
-                const rows = lines.slice(1)
-                    .filter(line => line.trim() !== "")
-                    .map(line => {
-                        const values = parseLine(line);
-                        const obj = {};
-                        headers.forEach((header, i) => {
-                            obj[header] = values[i]?.replace(/^"|"$/g, '') || "";
-                        });
-                        return obj;
-                    });
-
-                return rows;
-            } catch (error) {
-                console.error("Fetch error:", error);
-                return [];
-            }
-        }
-
-        // --- App Component ---
-        const App = () => {
-            const [db, setDb] = useState([]);
-            const [isDbLoading, setIsDbLoading] = useState(true);
-
-            // Profile State
-            const [industrySearch, setIndustrySearch] = useState('');
-            const [showSuggestions, setShowSuggestions] = useState(false);
-            const [phone, setPhone] = useState('');
-            const [taxId, setTaxId] = useState('');
-            const [isProfileComplete, setIsProfileComplete] = useState(false);
-            const suggestionRef = useRef(null);
-
-            // Phase 1.5 Goal Setting State
-            const [goalMode, setGoalMode] = useState('unset');
-            const [userGoal, setUserGoal] = useState(null);
-            const [isScanning, setIsScanning] = useState(false);
-            
-            const [goalPath, setGoalPath] = useState('carbon');
-            const [targetMethod, setTargetMethod] = useState('percentage');
-            
-            const [currentVal, setCurrentVal] = useState('');
-            const [targetVal, setTargetVal] = useState(''); 
-
-            // UI State
-            const [selectedAction, setSelectedAction] = useState(null);
-            const COLORS = ['#064E3B', '#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5', '#ECFDF5'];
-
-            useEffect(() => {
-                fetchDatabase().then(data => {
-                    setDb(data);
-                    setIsDbLoading(false);
-                }).catch(err => {
-                    console.error("Database Error:", err);
-                    setIsDbLoading(false);
-                });
-            }, []);
-
-            useEffect(() => {
-                const handleClickOutside = (event) => {
-                    if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
-                        setShowSuggestions(false);
-                    }
-                };
-                document.addEventListener("mousedown", handleClickOutside);
-                return () => document.removeEventListener("mousedown", handleClickOutside);
-            }, []);
-
-            const industries = useMemo(() => 
-                Array.from(new Set(db.map(r => r.案例公司產業別))).filter(Boolean).sort()
-            , [db]);
-
-            const isValidIndustry = useMemo(() => {
-                const input = industrySearch.trim();
-                return industries.some(ind => ind === input);
-            }, [industrySearch, industries]);
-
-            const filteredSuggestions = useMemo(() => {
-                const search = industrySearch.toLowerCase().trim();
-                if (!search) return industries.slice(0, 10);
-                return industries.filter(ind => ind.toLowerCase().includes(search)).slice(0, 10);
-            }, [industrySearch, industries]);
-
-            const isPhoneValid = useMemo(() => {
-                return phone.startsWith('09') && phone.length === 10;
-            }, [phone]);
-
-            const industryStats = useMemo(() => {
-                if (!isValidIndustry) return [];
-                return db.filter(r => r.案例公司產業別 === industrySearch);
-            }, [db, industrySearch, isValidIndustry]);
-
-            const systemDistribution = useMemo(() => {
-                const systems = {};
-                industryStats.forEach(row => {
-                    const valStr = row["a_系統佔比(同產業)"]?.replace('%', '') || "0";
-                    const val = parseFloat(valStr) || 0;
-                    if (val > 0) {
-                        systems[row.系統名稱] = Math.max(systems[row.系統名稱] || 0, val);
-                    }
-                });
-                return Object.entries(systems)
-                    .map(([name, value]) => ({ name, value }))
-                    .sort((a, b) => b.value - a.value);
-            }, [industryStats]);
-
-            const top5Systems = useMemo(() => systemDistribution.slice(0, 5), [systemDistribution]);
-
-            const parseMetric = (val) => {
-                if (!val) return 0;
-                const num = parseFloat(val.toString().replace(/,/g, '').trim());
-                return isNaN(num) ? 0 : num;
-            };
-
-            const getMetrics = (row) => {
-                const carbonReduction = parseMetric(row["c_碳減量中位數"]);
-                const energyPotentialMWh = parseMetric(row["c_節能潛力中位數"]);
-                const energyPotentialKWh = energyPotentialMWh * 1000;
-                const cost = parseMetric(row["c_投資成本中位數"]);
-                const saving = parseMetric(row["c_年節省成本中位數"]);
-                const payback = parseMetric(row["c_回收年限中位數"]);
-                const unitCost = parseMetric(row["c_單位減碳成本中位數"]);
-                
-                return { carbonReduction, energyPotentialKWh, cost, saving, payback, unitCost };
-            };
-
-            const recommendations = useMemo(() => {
-                if (industryStats.length === 0) return { type: 'none', items: [], targetGap: 0 };
-
-                const getValue = (r, path) => {
-                    if (path === 'carbon') {
-                        return parseFloat(r["c_碳減量中位數"]) || 0;
-                    } else {
-                        return (parseFloat(r["c_節能潛力中位數"]) || 0) * 1000;
-                    }
-                };
-                
-                const getSystemShare = (r) => {
-                    const valStr = r["a_系統佔比(同產業)"]?.replace('%', '') || "0";
-                    return parseFloat(valStr) || 0;
-                };
-
-                let targetGap = 0;
-                let path = 'carbon';
-
-                if (userGoal) {
-                    path = userGoal.path;
-                    const current = userGoal.currentValue;
-                    
-                    if (userGoal.targetType === 'percentage') {
-                        targetGap = current * (userGoal.targetValue / 100);
-                    } else {
-                        targetGap = userGoal.targetValue;
-                    }
-                } else {
-                    path = 'carbon'; 
-                }
-
-                let validActions = industryStats
-                    .filter(r => r.措施類型 && r.措施類型 !== '0' && getValue(r, path) > 0);
-
-                if (!userGoal) {
-                    validActions = validActions.sort((a, b) => {
-                        const shareA = getSystemShare(a);
-                        const shareB = getSystemShare(b);
-                        if (shareB !== shareA) return shareB - shareA;
-                        return getValue(b, path) - getValue(a, path);
-                    });
-                    
-                    return { type: 'no_goal', items: validActions.slice(0, 5), targetGap: 0 };
-                } else {
-                    validActions = validActions.sort((a, b) => getValue(b, path) - getValue(a, path));
-                    
-                    const primaryAction = validActions[0];
-                    if (!primaryAction) return { type: 'none', items: [], targetGap };
-                    
-                    const primaryImpact = getValue(primaryAction, path);
-
-                    if (primaryImpact >= targetGap) {
-                        const alternatives = validActions
-                            .filter(r => r.措施類型 !== primaryAction.措施類型)
-                            .slice(0, 2);
-                        return { type: 'single', items: [primaryAction, ...alternatives], targetGap };
-                    } 
-                    else {
-                        const combo = [primaryAction];
-                        let currentSum = primaryImpact;
-                        const candidates = validActions.filter(r => r !== primaryAction);
-                        
-                        for (const cand of candidates) {
-                            if (currentSum >= targetGap) break;
-                            if (!combo.some(c => c.措施類型 === cand.措施類型)) {
-                                combo.push(cand);
-                                currentSum += getValue(cand, path);
-                            }
-                        }
-                        if (currentSum < targetGap) {
-                            for (const cand of candidates) {
-                                if (currentSum >= targetGap) break;
-                                if (!combo.includes(cand)) {
-                                    combo.push(cand);
-                                    currentSum += getValue(cand, path);
-                                }
-                            }
-                        }
-                        return { type: 'combo', items: combo, targetGap, totalImpact: currentSum };
-                    }
-                }
-            }, [industryStats, userGoal]);
-
-            const handleProfileSubmit = (e) => {
-                e.preventDefault();
-                if (isValidIndustry && taxId.length === 8 && isPhoneValid) {
-                    setIsProfileComplete(true);
-                    setGoalMode('unset'); 
-                }
-            };
-
-            const handleNoGoal = () => {
-                setIsScanning(true);
-                setTimeout(() => {
-                    setGoalMode('no_goal');
-                    setIsScanning(false);
-                }, 1000);
-            };
-
-            const handleFormattedChange = (e, setter) => {
-                const rawValue = e.target.value.replace(/,/g, '').replace(/\D/g, '');
-                if (!rawValue) {
-                    setter('');
-                    return;
-                }
-                const formatted = Number(rawValue).toLocaleString('en-US');
-                setter(formatted);
-            };
-
-            const handleConfirmGoal = () => {
-                setIsScanning(true);
-                setTimeout(() => {
-                    setUserGoal({
-                        path: goalPath,
-                        currentValue: parseFloat(currentVal.replace(/,/g, '')) || 0,
-                        targetType: targetMethod,
-                        targetValue: parseFloat(targetVal.replace(/,/g, '')) || 0
-                    });
-                    setGoalMode('has_goal');
-                    setIsScanning(false);
-                }, 1200);
-            };
-
-            const resetAll = () => {
-                setIsProfileComplete(false);
-                setUserGoal(null);
-                setGoalMode('unset');
-                setIndustrySearch('');
-                setTaxId('');
-                setPhone('');
-                setCurrentVal('');
-                setTargetVal('');
-                setTargetMethod('percentage');
-            };
-
-            const handleRFQ = (action) => {
-                const params = new URLSearchParams({
-                    source: 'netellus_ai',
-                    industry: industrySearch,
-                    taxId: taxId,
-                    action: action.措施名稱 || action.措施類型,
-                    system: action.系統名稱
-                });
-                window.location.href = `https://rfq.netellus.com/rfq/create?${params.toString()}`;
-            };
-
-            const formatValue = (val, forceInteger = false) => {
-                if (val === 0 || isNaN(val)) return "0";
-                if (forceInteger || Math.abs(val) >= 1000) {
-                    return Math.round(val).toLocaleString('en-US');
-                }
-                return val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-            };
-            
-            const getUnit = () => {
-                if (userGoal) return userGoal.path === 'carbon' ? 'tCO2e' : 'kWh';
-                return 'tCO2e'; 
-            };
-
-            if (isDbLoading) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center">
-                        <div className="netellus-card p-12 text-center">
-                            <div className="w-12 h-12 border-4 border-[#064E3B] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                            <p className="text-[#064E3B] font-bold tracking-widest uppercase animate-pulse">大數據資料庫同步中...</p>
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="min-h-screen relative flex flex-col items-center pt-24 pb-12 px-4">
-                    {/* Header - Fixed Top Left */}
-                    <div className="fixed top-6 left-6 z-[100] cursor-pointer group" onClick={resetAll}>
-                        <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/50 shadow-sm transition-all group-hover:scale-105">
-                            <span className="text-xl font-black text-[#064E3B]">Netellus</span>
-                            {isProfileComplete && <span className="text-xs font-bold text-slate-400 pl-2 border-l border-slate-300">{industrySearch}</span>}
-                        </div>
-                    </div>
-
-                    {/* Main Container - The Single Card */}
-                    <main className="w-full max-w-4xl animate-in zoom-in">
-                        <div className="netellus-card p-8 md:p-12 relative min-h-[600px] flex flex-col justify-center">
-                            
-                            {!isProfileComplete ? (
-                                <div className="max-w-md mx-auto w-full animate-in slide-up">
-                                    <div className="text-center mb-10">
-                                        <h2 className="text-3xl font-black mb-2 text-[#111827]">Phase 1. 資料建立</h2>
-                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Corporate Data Collection</p>
-                                    </div>
-
-                                    <form onSubmit={handleProfileSubmit} className="space-y-6">
-                                        <div className="relative" ref={suggestionRef}>
-                                            <label className="text-xs font-bold text-slate-500 mb-2 block text-center uppercase tracking-wider">1. 產業類別 (Industry)</label>
-                                            <div className="relative">
-                                                <input 
-                                                    type="text" 
-                                                    autoComplete="off"
-                                                    value={industrySearch} 
-                                                    onChange={(e) => { 
-                                                        setIndustrySearch(e.target.value); 
-                                                        setShowSuggestions(true); 
-                                                    }} 
-                                                    onFocus={() => setShowSuggestions(true)}
-                                                    className={`w-full netellus-input py-4 px-4 text-lg ${isValidIndustry ? 'border-[#064E3B] bg-emerald-50 text-[#064E3B]' : ''}`} 
-                                                    placeholder="輸入關鍵字..." 
-                                                />
-                                                {isValidIndustry && (
-                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#064E3B]">
-                                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            {showSuggestions && filteredSuggestions.length > 0 && (
-                                                <div className="absolute z-[120] left-0 right-0 mt-2 bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden max-h-60 overflow-y-auto scrollbar-hide">
-                                                    {filteredSuggestions.map((ind, i) => (
-                                                        <div 
-                                                            key={i} 
-                                                            onMouseDown={(e) => {
-                                                                e.preventDefault();
-                                                                setIndustrySearch(ind); 
-                                                                setShowSuggestions(false); 
-                                                            }} 
-                                                            className={`px-4 py-4 cursor-pointer text-center text-sm font-bold transition-colors border-b border-slate-50 last:border-0 hover:bg-emerald-50 ${industrySearch === ind ? 'bg-emerald-50 text-[#064E3B]' : 'text-slate-600'}`}
-                                                        >
-                                                            {ind}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 mb-2 block text-center uppercase tracking-wider">2. 聯絡手機 (Mobile)</label>
-                                            <input 
-                                                required 
-                                                type="tel" 
-                                                autoComplete="off"
-                                                value={phone} 
-                                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} 
-                                                className={`w-full netellus-input py-4 px-4 text-lg tracking-widest ${phone && !isPhoneValid ? 'border-red-300 bg-red-50 text-red-500' : ''}`}
-                                                placeholder="09xxxxxxxx" 
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 mb-2 block text-center uppercase tracking-wider">3. 統一編號 (Tax ID)</label>
-                                            <input 
-                                                required 
-                                                type="text" 
-                                                maxLength={8} 
-                                                autoComplete="off"
-                                                value={taxId} 
-                                                onChange={(e) => setTaxId(e.target.value.replace(/\D/g, ''))} 
-                                                className="w-full netellus-input py-4 px-4 text-lg tracking-widest" 
-                                                placeholder="8 位數統編" 
-                                            />
-                                        </div>
-
-                                        <div className="pt-4">
-                                            <button 
-                                                type="submit" 
-                                                disabled={!isValidIndustry || taxId.length !== 8 || !isPhoneValid} 
-                                                className="w-full py-4 netellus-btn-primary text-lg"
-                                            >
-                                                {isValidIndustry && taxId.length === 8 && isPhoneValid ? '下一步：目標設定' : '請填寫完整資訊'}
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            ) : goalMode === 'unset' ? (
-                                <div className="max-w-md mx-auto w-full text-center animate-in slide-up">
-                                    <h2 className="text-3xl font-black mb-10 text-[#111827] leading-tight">您是否有明確的<br/>年度減量目標？</h2>
-                                    <div className="space-y-4">
-                                        <button 
-                                            onClick={() => setGoalMode('has_goal_input')}
-                                            className="w-full py-5 netellus-btn-primary text-lg"
-                                        >
-                                            我有明確目標
-                                        </button>
-                                        <button 
-                                            onClick={handleNoGoal}
-                                            className="w-full py-5 bg-white border-2 border-slate-100 text-slate-500 rounded-2xl font-bold hover:border-slate-300 hover:text-slate-700 transition-all"
-                                        >
-                                            我目前沒有目標，請提供建議
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : goalMode === 'has_goal_input' ? (
-                                <div className="max-w-xl mx-auto w-full animate-in slide-up">
-                                    <div className="text-center mb-10">
-                                        <h2 className="text-3xl font-black mb-2 text-[#111827]">Phase 1.5 目標設定</h2>
-                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Target Setting</p>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-4 mb-8">
-                                        <button onClick={() => setGoalPath('carbon')} className={`py-4 rounded-2xl font-bold text-sm transition-all ${goalPath === 'carbon' ? 'bg-[#064E3B] text-white ring-4 ring-[#064E3B]/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>碳排放減量</button>
-                                        <button onClick={() => setGoalPath('energy')} className={`py-4 rounded-2xl font-bold text-sm transition-all ${goalPath === 'energy' ? 'bg-[#064E3B] text-white ring-4 ring-[#064E3B]/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>節電目標</button>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-6 mb-10">
-                                        <div className="text-center space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">現況基準 (Baseline)</label>
-                                            <div className="relative">
-                                                <input 
-                                                    type="text" 
-                                                    inputMode="numeric"
-                                                    value={currentVal} 
-                                                    onChange={(e) => handleFormattedChange(e, setCurrentVal)} 
-                                                    className="w-full netellus-input py-4 text-2xl" 
-                                                    placeholder="0" 
-                                                />
-                                                <span className="absolute right-3 bottom-2 text-[10px] font-bold text-slate-400">{goalPath === 'carbon' ? 'tCO2e' : 'kWh'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-center space-y-2">
-                                            <div className="flex justify-center items-center gap-2 mb-2">
-                                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">目標減量 (Target)</label>
-                                                <div className="flex bg-slate-100 rounded-lg p-0.5">
-                                                    <button onClick={() => { setTargetMethod('percentage'); setTargetVal(''); }} className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${targetMethod === 'percentage' ? 'bg-white shadow-sm text-[#064E3B]' : 'text-slate-400'}`}>%</button>
-                                                    <button onClick={() => { setTargetMethod('absolute'); setTargetVal(''); }} className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${targetMethod === 'absolute' ? 'bg-white shadow-sm text-[#064E3B]' : 'text-slate-400'}`}>數值</button>
-                                                </div>
-                                            </div>
-                                            <div className="relative">
-                                                <input 
-                                                    type={targetMethod === 'percentage' ? "number" : "text"}
-                                                    inputMode={targetMethod === 'percentage' ? "decimal" : "numeric"}
-                                                    value={targetVal} 
-                                                    onChange={(e) => {
-                                                        if (targetMethod === 'percentage') { setTargetVal(e.target.value); } 
-                                                        else { handleFormattedChange(e, setTargetVal); }
-                                                    }}
-                                                    className="w-full netellus-input py-4 text-2xl" 
-                                                    placeholder="0" 
-                                                />
-                                                <span className="absolute right-3 bottom-2 text-[10px] font-bold text-slate-400">{targetMethod === 'percentage' ? '%' : (goalPath === 'carbon' ? 'tCO2e' : 'kWh')}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button 
-                                        onClick={handleConfirmGoal} 
-                                        className="w-full py-5 netellus-btn-primary text-lg flex items-center justify-center gap-2"
-                                    >
-                                        {isScanning ? (
-                                            <>
-                                                <div className="w-5 h-5 border-3 border-black border-t-transparent rounded-full animate-spin"></div>
-                                                <span>AI 運算配對中...</span>
-                                            </>
-                                        ) : '生成最佳減量路徑'}
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="w-full animate-in slide-up space-y-12">
-                                    {/* Dashboard Intro */}
-                                    <div className="text-center">
-                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest mb-4 inline-block ${!userGoal ? 'bg-slate-100 text-slate-500' : recommendations.type === 'single' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
-                                            {!userGoal ? 'Top Potential' : recommendations.type === 'single' ? 'Single Path Strategy' : 'Combo Strategy'}
-                                        </span>
-                                        <h2 className="text-3xl md:text-4xl font-black text-[#111827] mb-4 leading-tight">
-                                            {!userGoal 
-                                                ? `為您篩選最佳減碳機會`
-                                                : recommendations.type === 'single' 
-                                                    ? `恭喜！單一技術即可達標` 
-                                                    : `目標宏大，建議採取複合策略`}
-                                        </h2>
-                                        {userGoal && (
-                                            <div className="flex justify-center items-end gap-2 mt-4">
-                                                <span className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Gap</span>
-                                                <span className="text-4xl font-black text-[#064E3B]">{formatValue(recommendations.targetGap)}</span>
-                                                <span className="text-sm font-bold text-slate-400 mb-1">{getUnit()}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Content Grid */}
-                                    <div className="grid md:grid-cols-2 gap-12">
-                                        {/* Left: Chart */}
-                                        <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100">
-                                            <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">系統佔比分佈</p>
-                                            <div className="h-48 w-full relative">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <PieChart>
-                                                        <Pie
-                                                            data={systemDistribution}
-                                                            cx="50%"
-                                                            cy="50%"
-                                                            innerRadius={60}
-                                                            outerRadius={80}
-                                                            paddingAngle={3}
-                                                            dataKey="value"
-                                                            cornerRadius={4}
-                                                        >
-                                                            {systemDistribution.map((entry, index) => (
-                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                                                            ))}
-                                                        </Pie>
-                                                        <Tooltip 
-                                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', padding: '8px 12px' }}
-                                                            itemStyle={{ color: '#111827', fontWeight: 'bold', fontSize: '12px' }}
-                                                        />
-                                                    </PieChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                            <div className="mt-6 space-y-3">
-                                                {top5Systems.map((item, index) => (
-                                                    <div key={index} className="flex justify-between items-center text-xs">
-                                                        <span className="font-bold text-slate-600 flex items-center">
-                                                            <span className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                                                            {item.name}
-                                                        </span>
-                                                        <span className="font-black text-[#064E3B]">{item.value}%</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Right: Recommendations */}
-                                        <div>
-                                            <div className="flex justify-between items-end mb-6 pb-2 border-b border-slate-100">
-                                                <h3 className="font-bold text-lg text-[#111827]">推薦方案</h3>
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Median Analysis</span>
-                                            </div>
-                                            
-                                            <div className="space-y-4">
-                                                {recommendations.items.map((row, idx) => {
-                                                    const m = getMetrics(row);
-                                                    return (
-                                                        <div 
-                                                            key={idx}
-                                                            onClick={() => setSelectedAction(row)}
-                                                            className="group bg-white border border-slate-100 rounded-2xl p-4 hover:border-[#34FF5B] hover:shadow-lg transition-all cursor-pointer relative overflow-hidden"
-                                                        >
-                                                            <div className="flex justify-between items-start">
-                                                                <div>
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-black ${idx === 0 ? 'bg-[#064E3B] text-white' : 'bg-slate-100 text-slate-500'}`}>{idx + 1}</span>
-                                                                        {idx === 0 && <span className="bg-[#34FF5B] text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded">BEST</span>}
-                                                                    </div>
-                                                                    <h4 className="font-black text-lg text-[#111827] group-hover:text-[#064E3B] transition-colors">{row.系統名稱}</h4>
-                                                                    <p className="text-xs font-bold text-slate-500 mt-0.5">{row.措施名稱 || row.措施類型}</p>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <p className="text-lg font-black text-[#064E3B]">
-                                                                        {userGoal?.path === 'energy' ? formatValue(m.energyPotentialKWh) : formatValue(m.carbonReduction)}
-                                                                        <span className="text-[10px] text-slate-400 font-bold ml-1">{userGoal?.path === 'energy' ? 'kWh' : 't'}</span>
-                                                                    </p>
-                                                                    <p className="text-[10px] font-bold text-slate-400">ROI: {formatValue(m.payback)} Yr</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Footer Action */}
-                                    <div className="text-center pt-8 border-t border-slate-100">
-                                        <p className="text-xs text-slate-400 font-bold mb-4">需要詳細的工程評估報告？</p>
-                                        <button className="netellus-btn-primary px-8 py-3 text-sm">聯繫 Netellus 顧問團隊</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </main>
-
-                    {/* Modal Overlay */}
-                    {selectedAction && (() => {
-                        const m = getMetrics(selectedAction);
-                        return (
-                            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#064E3B]/40 backdrop-blur-md" onClick={() => setSelectedAction(null)}>
-                                <div className="bg-white rounded-[32px] p-8 md:p-10 max-w-2xl w-full shadow-2xl animate-in zoom-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                                    <div className="flex justify-between items-start mb-8">
-                                        <div>
-                                            <span className="inline-block bg-slate-100 text-slate-500 font-bold text-[10px] px-2 py-1 rounded-md mb-2">{selectedAction.案例公司產業別}</span>
-                                            <h3 className="text-3xl font-black text-[#111827]">{selectedAction.系統名稱}</h3>
-                                            <p className="text-lg font-bold text-slate-500 mt-1">{selectedAction.措施名稱 || selectedAction.措施類型}</p>
-                                        </div>
-                                        <button onClick={() => setSelectedAction(null)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors">
-                                            <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                                        {[
-                                            { label: '碳減量', val: m.carbonReduction, unit: 't/yr' },
-                                            { label: '節能潛力', val: m.energyPotentialKWh, unit: 'kWh/yr' },
-                                            { label: '投資成本', val: m.cost, unit: '萬' },
-                                            { label: '年節省', val: m.saving, unit: '萬' },
-                                            { label: '回收年限', val: m.payback, unit: 'Yr' },
-                                            { label: '單位成本', val: m.unitCost, unit: '$/t' },
-                                        ].map((item, i) => (
-                                            <div key={i} className="bg-slate-50 rounded-2xl p-4 text-center">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{item.label}</p>
-                                                <p className="text-xl font-black text-[#064E3B]">{formatValue(item.val, item.label==='單位成本')}</p>
-                                                <p className="text-[10px] font-bold text-slate-400">{item.unit}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="space-y-4 mb-8">
-                                        <div className="p-6 bg-[#F3F4F6] rounded-2xl">
-                                            <h4 className="font-bold text-[#111827] text-sm mb-2 uppercase tracking-wide">企業痛點</h4>
-                                            <p className="text-sm text-slate-600 font-medium leading-relaxed">{selectedAction["企業問題"] || "既有設備能效低落，維護成本逐年上升。"}</p>
-                                        </div>
-                                        <div className="p-6 bg-emerald-50 rounded-2xl">
-                                            <h4 className="font-bold text-[#064E3B] text-sm mb-2 uppercase tracking-wide">解決方案</h4>
-                                            <p className="text-sm text-emerald-800 font-medium leading-relaxed">{selectedAction["解決方案"] || "導入高效能設備與智慧控制系統。"}</p>
-                                        </div>
-                                    </div>
-
-                                    <button 
-                                        onClick={() => handleRFQ(selectedAction)}
-                                        className="w-full py-5 netellus-btn-primary text-lg flex items-center justify-center gap-2"
-                                    >
-                                        <span>前往 RFQ 平台詢價</span>
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })()}
-                </div>
-            );
-        };
-
-        const root = createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+    <!-- Load the React App -->
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
 </body>
 </html>

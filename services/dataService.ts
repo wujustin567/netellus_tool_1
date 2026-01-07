@@ -1,4 +1,4 @@
-import { DatabaseRow } from "../types";
+import { DatabaseRow } from "../types.ts";
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1RH52lJntYqVS-WW9iVsqFxtN9uWJY7k4Noipt3Tn-qU/gviz/tq?tqx=out:csv&sheet=%E7%B5%90%E6%9E%9C%E7%B8%BD%E8%A1%A8";
 
